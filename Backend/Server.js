@@ -4,7 +4,7 @@ const fs = require("fs");
 const express = require("express");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const app = express();
 
@@ -23,11 +23,11 @@ app.use(express.json());
 // Set up PostgreSQL Pool connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
 });
 
 // PostgreSQL Query Helper
-const query = (text, params = []) => pool.query(text, params).then(res => res.rows);
+const query = (text, params = []) => pool.query(text, params).then((res) => res.rows);
 
 async function initDatabase() {
   // Create ENUM types if they don't exist
@@ -271,27 +271,33 @@ app.delete("/api/tasks/:id", async (req, res) => {
   }
 });
 
-// ---------------- Stats Route ----------------
+// ---------------- Stats Route (SQL Aggregated) ----------------
 
 app.get("/api/stats", async (_req, res) => {
   try {
-    const rows = await query("SELECT * FROM tasks");
-    const total = rows.length;
-    const completed = rows.filter((t) => t.status === "completed").length;
-    const inProgress = rows.filter((t) => t.status === "in_progress").length;
-    const pending = rows.filter((t) => t.status === "pending").length;
-    const urgent = rows.filter((t) => ["high", "urgent"].includes(t.priority)).length;
     const today = new Date().toISOString().slice(0, 10);
-    const overdue = rows.filter(
-      (t) => t.status !== "completed" && t.due_date && t.due_date < today
-    ).length;
+    const rows = await query(`
+      SELECT 
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
+        COUNT(*) FILTER (WHERE status = 'in_progress')::int AS in_progress,
+        COUNT(*) FILTER (WHERE status = 'pending')::int AS pending,
+        COUNT(*) FILTER (WHERE priority IN ('high', 'urgent'))::int AS urgent,
+        COUNT(*) FILTER (WHERE status != 'completed' AND due_date != '' AND due_date < $1)::int AS overdue
+      FROM tasks
+    `, [today]);
+
+    const stats = rows[0];
+    const total = stats.total || 0;
+    const completed = stats.completed || 0;
+
     res.json({
       total,
       completed,
-      inProgress,
-      pending,
-      urgent,
-      overdue,
+      inProgress: stats.in_progress || 0,
+      pending: stats.pending || 0,
+      urgent: stats.urgent || 0,
+      overdue: stats.overdue || 0,
       completionPercent: total === 0 ? 0 : Math.round((completed / total) * 100),
     });
   } catch (err) {
