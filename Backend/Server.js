@@ -8,7 +8,11 @@ const { Pool } = require("pg");
 
 const app = express();
 
-const PORT = Number(process.env.PORT) || 5000;
+// Replace process.env.PORT check with a forced web port (e.g., 10000 or 5000)
+const PORT = process.env.PORT && process.env.PORT !== "5432" 
+  ? process.env.PORT 
+  : 10000;
+
 const HOST = process.env.HOST || "0.0.0.0";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL || "superadmin@genlab.com";
