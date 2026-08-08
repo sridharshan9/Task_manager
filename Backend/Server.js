@@ -5,6 +5,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const mysql = require("mysql2");
 const cors = require("cors");
+const { Pool } = require('pg');
 
 const app = express();
 
@@ -23,6 +24,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 const db = mysql.createPool({
   host: DB_HOST,
