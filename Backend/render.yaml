@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: genlab-taskmanager-api
+    runtime: node
+    plan: free
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set this to your Vercel frontend URL once deployed, e.g.
+      # CORS_ORIGIN=https://genlab-task-manager.vercel.app
+      - key: CORS_ORIGIN
+        value: "*"
+      # MySQL connection. Provision a MySQL database (Render MySQL or any
+      # external provider) and fill these in the Render dashboard. Keep
+      # sync:false so real values are never committed to this file.
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      # Super admin account created automatically on first run.
+      - key: SUPERADMIN_EMAIL
+        sync: false
+      - key: SUPERADMIN_PASSWORD
+        sync: false

@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# environment / secrets
+.env
+
+# logs
+*.log
+npm-debug.log*
+
+# build / dist
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+node_modules/
+.env
+.env.local
+.env.production
+dist/
+build/
+*.log
