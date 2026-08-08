@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# environment secrets
+.env
+.env.local
+
+# stray root package files (duplicates of Backend/ and Frontend/ deps)
+/package.json
+/package-lock.json
+
+# build output
+build/
+dist/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# preserved dead nested repo (see Frontend/gen_lab)
+.git-bak
